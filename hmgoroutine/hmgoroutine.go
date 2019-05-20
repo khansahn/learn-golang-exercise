@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"sync"
+	"time"
 )
 
 func say(s string) {
@@ -19,7 +19,7 @@ func sum(s []int, c chan int) {
 	for _, v := range s {
 		sum += v
 	}
-	c <- sum 	// send sum to c
+	c <- sum // send sum to c
 }
 
 // range and close
@@ -39,7 +39,7 @@ func fibonacci2(c, quit chan int) {
 		select {
 		case c <- x:
 			x, y = y, x+y
-		case <- quit:
+		case <-quit:
 			fmt.Println("quit")
 			return
 		}
@@ -51,9 +51,10 @@ func fibonacci2(c, quit chan int) {
 /// make sure only one  goroutine can access a variable at a time to avoid conflicts
 //// SafeCounter is safe to use concurrently
 type SafeCounter struct {
-	v map[string]int
+	v   map[string]int
 	mux sync.Mutex
 }
+
 //// Inc increments the counter for the given key
 func (c *SafeCounter) Inc(key string) {
 	c.mux.Lock()
@@ -61,6 +62,7 @@ func (c *SafeCounter) Inc(key string) {
 	c.v[key]++
 	c.mux.Unlock()
 }
+
 //// value returns the current value of the counter for the given key
 func (c *SafeCounter) Value(key string) int {
 	c.mux.Lock()
@@ -79,7 +81,7 @@ func main() {
 	c := make(chan int)
 	go sum(s[:len(s)/2], c)
 	go sum(s[len(s)/2:], c)
-	x, y := <- c, <- c 	// receive from c
+	x, y := <-c, <-c // receive from c
 
 	fmt.Println(x, y, x+y)
 
@@ -87,8 +89,8 @@ func main() {
 	ch := make(chan int, 2)
 	ch <- 1
 	ch <- 2
-	fmt.Println(<- ch)
-	fmt.Println(<- ch)
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
 
 	// range and close
 	cr := make(chan int, 10)
@@ -102,7 +104,7 @@ func main() {
 	quit := make(chan int)
 	go func() {
 		for i := 0; i < 10; i++ {
-			fmt.Println(<- cs)
+			fmt.Println(<-cs)
 		}
 		quit <- 0
 	}()
@@ -131,7 +133,6 @@ func main() {
 	}
 
 	time.Sleep(time.Second)
-	fmt.Println("HAHAAHHH",csm.Value("somekey"))
-
+	fmt.Println("HAHAAHHH", csm.Value("somekey"))
 
 }
